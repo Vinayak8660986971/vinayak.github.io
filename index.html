@@ -1,177 +1,56 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Automated Travel Advisor — Demo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Fitness Agent</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <h1 class="brand">Automated Travel Advisor</h1>
-    <p class="tag">Generate → Validate → Finalize (with QA guardrails)</p>
-  </header>
+  <div class="container">
+    <h2>AI Fitness & Nutrition Coach</h2>
+    <form id="fitnessForm">
+      <label for="goal">Your Fitness Goal:</label>
+      <select id="goal" name="goal">
+        <option value="weight_loss">Weight Loss</option>
+        <option value="muscle_gain">Muscle Gain</option>
+        <option value="endurance">Improve Endurance</option>
+        <option value="general_fitness">General Fitness</option>
+      </select>
 
-  <main class="container">
-    <section class="controls">
-      <form id="criteriaForm" class="card" aria-labelledby="criteriaTitle">
-        <h2 id="criteriaTitle">Trip criteria</h2>
+      <label for="age">Age:</label>
+      <input type="number" id="age" name="age" placeholder="Enter your age">
 
-        <div class="row">
-          <label>
-            Destination
-            <input name="destination" id="destination" type="text" placeholder="e.g. Lisbon" required>
-          </label>
-          <label>
-            Travel dates
-            <input name="dates" id="dates" type="text" placeholder="e.g. 2026-06-01 to 2026-06-10" required>
-          </label>
-        </div>
+      <label for="weight">Current Weight (kg):</label>
+      <input type="number" id="weight" name="weight" placeholder="Enter your weight">
 
-        <div class="row">
-          <label>
-            Budget (USD)
-            <input name="budget" id="budget" type="number" min="0" value="2000">
-          </label>
-          <label>
-            Travelers
-            <input name="travelers" id="travelers" type="number" min="1" value="2">
-          </label>
-        </div>
+      <label for="height">Height (cm):</label>
+      <input type="number" id="height" name="height" placeholder="Enter your height">
 
-        <div class="actions">
-          <button type="button" id="generateBtn" class="btn primary">Generate plan</button>
-          <button type="button" id="validateBtn" class="btn" disabled>Validate plan</button>
-          <button type="button" id="finalizeBtn" class="btn" disabled>Finalize</button>
-        </div>
-      </form>
+      <button type="button" onclick="generatePlan()">Get Plan</button>
+    </form>
 
-      <aside id="qaGuardrails" class="card guardrails" aria-labelledby="guardTitle">
-        <h3 id="guardTitle">QA Guardrails</h3>
-        <ul>
-          <li data-check="true">Itinerary includes at least 1 experience per day.</li>
-          <li data-check="true">Estimated costs attempt to respect budget.</li>
-          <li data-check="true">At least one transport option and one lodging option provided.</li>
-          <li data-check="false">Local COVID / visa checks performed (demo: manual step)</li>
-        </ul>
-      </aside>
-    </section>
-
-    <section class="plan-area">
-      <div id="planCard" class="card plan empty" aria-live="polite">
-        <h2 class="muted">Plan preview</h2>
-        <div id="planContent">
-          <p class="muted">No plan generated yet. Click "Generate plan" to create a draft itinerary.</p>
-        </div>
-      </div>
-
-      <div id="validationCard" class="card validation">
-        <h3>Validation log</h3>
-        <ul id="validationLog" class="log"></ul>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <small>Demo — not connected to live booking APIs. Replace mock logic with real services for production.</small>
-  </footer>
+    <div class="output" id="output"></div>
+  </div>
 
   <script>
-    // Minimal demo automation logic. Replace with backend/LLM calls for production.
-    const generateBtn = document.getElementById('generateBtn');
-    const validateBtn = document.getElementById('validateBtn');
-    const finalizeBtn = document.getElementById('finalizeBtn');
-    const planContent = document.getElementById('planContent');
-    const validationLog = document.getElementById('validationLog');
+    function generatePlan() {
+      let goal = document.getElementById("goal").value;
+      let age = document.getElementById("age").value;
+      let weight = document.getElementById("weight").value;
+      let height = document.getElementById("height").value;
 
-    let currentPlan = null;
-
-    function formatMoney(n){ return '$' + Number(n).toLocaleString(); }
-
-    generateBtn.addEventListener('click', ()=>{
-      const destination = document.getElementById('destination').value || 'Barcelona';
-      const dates = document.getElementById('dates').value || '2026-06-01 to 2026-06-08';
-      const budget = Number(document.getElementById('budget').value) || 2000;
-      const travelers = Number(document.getElementById('travelers').value) || 2;
-
-      // Mock plan generation
-      currentPlan = {
-        destination, dates, budget, travelers,
-        nights: 7,
-        flights: { provider: 'DemoAir', cost: Math.round(400 * travelers) },
-        hotel: { name: 'Central Hotel', costPerNight: 120 },
-        dailyActivities: [
-          'Arrival & city walk',
-          'Historic old town tour',
-          'Beach day',
-          'Food market + cooking class',
-          'Day trip to nearby village',
-          'Museum day',
-          'Relax & departure'
-        ]
-      };
-
-      const lodging = currentPlan.nights * currentPlan.hotel.costPerNight * 1;
-      const activities = currentPlan.dailyActivities.length * 40 * travelers;
-      const estimatedTotal = currentPlan.flights.cost + lodging + activities;
-      currentPlan.estimatedTotal = estimatedTotal;
-
-      planContent.innerHTML = `
-        <h3>${currentPlan.destination} — ${currentPlan.dates}</h3>
-        <p><strong>Travelers:</strong> ${currentPlan.travelers} • <strong>Estimated total:</strong> ${formatMoney(estimatedTotal)}</p>
-        <h4>Accommodation</h4>
-        <p>${currentPlan.hotel.name} — ${formatMoney(currentPlan.hotel.costPerNight)} / night</p>
-        <h4>Transport</h4>
-        <p>${currentPlan.flights.provider} — ${formatMoney(currentPlan.flights.cost)}</p>
-        <h4>Daily plan</h4>
-        <ol>${currentPlan.dailyActivities.map(a=>`<li>${a}</li>`).join('')}</ol>
+      // Temporary mock response (later connect to CrewAI backend)
+      let plan = `
+        <b>Goal:</b> ${goal.replace("_"," ")} <br>
+        <b>Age:</b> ${age} <br>
+        <b>Weight:</b> ${weight} kg <br>
+        <b>Height:</b> ${height} cm <br><br>
+        <b>Suggested Workout:</b> 5-day split (Push, Pull, Legs, Cardio, Core)<br>
+        <b>Nutrition Plan:</b> High protein, balanced carbs, healthy fats.
       `;
 
-      validateBtn.disabled = false;
-      finalizeBtn.disabled = true;
-      validationLog.innerHTML = '';
-      document.getElementById('planCard').classList.remove('empty');
-    });
-
-    validateBtn.addEventListener('click', ()=>{
-      validationLog.innerHTML = '';
-      if(!currentPlan){
-        appendLog('No plan to validate — generate one first.', 'error');
-        return;
-      }
-
-      // Guardrail checks (demo)
-      const checks = [];
-      checks.push({ok: currentPlan.dailyActivities.length >= currentPlan.nights, msg: 'At least 1 activity per night/day.'});
-      checks.push({ok: currentPlan.estimatedTotal <= currentPlan.budget, msg: 'Est. total vs budget.'});
-      checks.push({ok: !!currentPlan.flights && !!currentPlan.hotel, msg: 'Transport and lodging included.'});
-
-      checks.forEach((c)=> appendLog((c.ok? '✔' : '✖') + ' ' + c.msg, c.ok ? 'ok' : 'fail'));
-
-      const passed = checks.every(c=>c.ok);
-      if(passed){
-        appendLog('All automated checks passed. Ready to finalize.', 'ok');
-        finalizeBtn.disabled = false;
-      } else {
-        appendLog('Some checks failed. Review guardrails before finalizing.', 'warn');
-        finalizeBtn.disabled = true;
-      }
-    });
-
-    finalizeBtn.addEventListener('click', ()=>{
-      if(!currentPlan) return;
-      currentPlan.finalizedAt = new Date().toISOString();
-      appendLog('Plan finalized and snapshot saved.', 'ok');
-      planContent.insertAdjacentHTML('beforeend', `<p class="finalized">Finalized on ${new Date().toLocaleString()}</p>`);
-      finalizeBtn.disabled = true;
-      validateBtn.disabled = true;
-    });
-
-    function appendLog(msg, cls=''){
-      const li = document.createElement('li');
-      li.textContent = msg;
-      li.className = cls;
-      validationLog.appendChild(li);
+      document.getElementById("output").innerHTML = plan;
     }
   </script>
 </body>
