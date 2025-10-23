@@ -1,57 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Fitness Agent</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prompt Enhancer — Contextual Image Prompts</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h2>AI Fitness & Nutrition Coach</h2>
-    <form id="fitnessForm">
-      <label for="goal">Your Fitness Goal:</label>
-      <select id="goal" name="goal">
-        <option value="weight_loss">Weight Loss</option>
-        <option value="muscle_gain">Muscle Gain</option>
-        <option value="endurance">Improve Endurance</option>
-        <option value="general_fitness">General Fitness</option>
-      </select>
+  <div class="app">
+    <header class="header">
+      <h1>Prompt Enhancer</h1>
+      <p class="subtitle">Automatically add contextual details to get better image outputs.</p>
+    </header>
 
-      <label for="age">Age:</label>
-      <input type="number" id="age" name="age" placeholder="Enter your age">
+    <main class="card">
+      <div class="row">
+        <label for="basePrompt">Base prompt</label>
+        <textarea id="basePrompt" placeholder="Describe the scene, subject, or idea...">A serene mountain lake at sunrise</textarea>
+      </div>
 
-      <label for="weight">Current Weight (kg):</label>
-      <input type="number" id="weight" name="weight" placeholder="Enter your weight">
+      <div class="controls-grid">
+        <div class="control">
+          <label>Style</label>
+          <select id="style">
+            <option value="">(none)</option>
+            <option value="photorealistic">Photorealistic</option>
+            <option value="cinematic">Cinematic</option>
+            <option value="watercolor painting">Watercolor painting</option>
+            <option value="studio product shot">Studio product shot</option>
+            <option value="vintage 1950s poster">Vintage 1950s poster</option>
+            <option value="fantasy illustration">Fantasy illustration</option>
+          </select>
+        </div>
 
-      <label for="height">Height (cm):</label>
-      <input type="number" id="height" name="height" placeholder="Enter your height">
+        <div class="control">
+          <label>Mood & Lighting</label>
+          <select id="mood">
+            <option value="">(none)</option>
+            <option value="warm golden-hour lighting">Warm golden-hour lighting</option>
+            <option value="moody dramatic lighting">Moody dramatic lighting</option>
+            <option value="soft diffused overcast light">Soft diffused overcast light</option>
+            <option value="high-contrast studio lighting">High-contrast studio lighting</option>
+            <option value="neon cyberpunk glow">Neon cyberpunk glow</option>
+          </select>
+        </div>
 
-      <button type="button" onclick="generatePlan()">Get Plan</button>
-    </form>
+        <div class="control">
+          <label>Color Palette</label>
+          <select id="palette">
+            <option value="">(none)</option>
+            <option value="muted earth tones">Muted earth tones</option>
+            <option value="vibrant saturated colors">Vibrant saturated colors</option>
+            <option value="pastel palette">Pastel palette</option>
+            <option value="monochrome (black & white)">Monochrome (black & white)</option>
+          </select>
+        </div>
 
-    <div class="output" id="output"></div>
+        <div class="control">
+          <label>Camera / Lens</label>
+          <select id="camera">
+            <option value="">(none)</option>
+            <option value="35mm wide-angle, shallow depth of field">35mm wide-angle, shallow depth of field</option>
+            <option value="telephoto 85mm, bokeh background">Telephoto 85mm, bokeh background</option>
+            <option value="macro close-up">Macro close-up</option>
+            <option value="drone aerial view">Drone aerial view</option>
+          </select>
+        </div>
+
+        <div class="control">
+          <label>Composition / Detail</label>
+          <select id="composition">
+            <option value="">(none)</option>
+            <option value="rule of thirds, foreground interest">Rule of thirds, foreground interest</option>
+            <option value="symmetrical composition, minimal">Symmetrical composition, minimal</option>
+            <option value="wide panorama, expansive sky">Wide panorama, expansive sky</option>
+            <option value="close framed portrait, intense expression">Close framed portrait, intense expression</option>
+          </select>
+        </div>
+
+        <div class="control checkbox-control">
+          <label>Extras</label>
+          <div class="checkboxes">
+            <label><input type="checkbox" id="hd" /> High detail / ultra realistic</label>
+            <label><input type="checkbox" id="vfx" /> Add cinematic VFX / particles</label>
+            <label><input type="checkbox" id="film" /> Film grain / analog texture</label>
+            <label><input type="checkbox" id="illustration" /> Vector/illustration-friendly</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="enhanceBtn">Enhance Prompt</button>
+        <button id="clearBtn" class="secondary">Clear</button>
+      </div>
+
+      <div class="output-area">
+        <label for="enhanced">Enhanced prompt</label>
+        <textarea id="enhanced" readonly placeholder="Your enhanced prompt will appear here"></textarea>
+
+        <div class="output-meta">
+          <div class="meta-item">
+            <label>Preview length</label>
+            <span id="length">0</span> chars
+          </div>
+          <div class="meta-item">
+            <button id="copyBtn">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <details class="tips">
+        <summary>Prompting tips</summary>
+        <ul>
+          <li>Start with a clear subject, then layer style, lighting, and camera details.</li>
+          <li>Use commas to separate clauses for many image models.</li>
+          <li>Toggle "High detail" to favor more descriptors like "intricate, photorealistic".</li>
+        </ul>
+      </details>
+    </main>
+
+    <footer class="footer">
+      <small>Front-end demo only — connect to your image generation backend (CrewAI, API) to use the prompt.</small>
+    </footer>
   </div>
 
   <script>
-    function generatePlan() {
-      let goal = document.getElementById("goal").value;
-      let age = document.getElementById("age").value;
-      let weight = document.getElementById("weight").value;
-      let height = document.getElementById("height").value;
+    // Frontend-only enhancement logic
+    const enhanceBtn = document.getElementById('enhanceBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const copyBtn = document.getElementById('copyBtn');
 
-      // Temporary mock response (later connect to CrewAI backend)
-      let plan = `
-        <b>Goal:</b> ${goal.replace("_"," ")} <br>
-        <b>Age:</b> ${age} <br>
-        <b>Weight:</b> ${weight} kg <br>
-        <b>Height:</b> ${height} cm <br><br>
-        <b>Suggested Workout:</b> 5-day split (Push, Pull, Legs, Cardio, Core)<br>
-        <b>Nutrition Plan:</b> High protein, balanced carbs, healthy fats.
-      `;
-
-      document.getElementById("output").innerHTML = plan;
+    function joinIf(val) {
+      return val && val.trim() ? val.trim() : null;
     }
+
+    function buildEnhancedPrompt() {
+      const base = document.getElementById('basePrompt').value.trim();
+      const style = joinIf(document.getElementById('style').value);
+      const mood = joinIf(document.getElementById('mood').value);
+      const palette = joinIf(document.getElementById('palette').value);
+      const camera = joinIf(document.getElementById('camera').value);
+      const composition = joinIf(document.getElementById('composition').value);
+      const hd = document.getElementById('hd').checked;
+      const vfx = document.getElementById('vfx').checked;
+      const film = document.getElementById('film').checked;
+      const illustration = document.getElementById('illustration').checked;
+
+      if (!base) return '';
+
+      const parts = [base];
+
+      // Add style first
+      if (style) parts.push(`Style: ${style}`);
+
+      // Add mood & lighting
+      if (mood) parts.push(`${mood}`);
+
+      // Camera & composition
+      if (camera) parts.push(`${camera}`);
+      if (composition) parts.push(`${composition}`);
+
+      // Color & palette
+      if (palette) parts.push(`${palette}`);
+
+      // Extras produce extra descriptors
+      const extras = [];
+      if (hd) extras.push('high detail, ultra-realistic, intricate textures, 8k');
+      if (vfx) extras.push('cinematic VFX, particles, volumetric light');
+      if (film) extras.push('film grain, analog texture, subtle color bleed');
+      if (illustration) extras.push('clean vector shapes, flat colors, illustration style');
+
+      if (extras.length) parts.push(extras.join(', '));
+
+      // Join with commas to create a cohesive prompt
+      const enhanced = parts.join(', ').replace(/\s+,/g, ',').trim();
+
+      return enhanced;
+    }
+
+    enhanceBtn.addEventListener('click', () => {
+      const out = document.getElementById('enhanced');
+      const enhanced = buildEnhancedPrompt();
+      out.value = enhanced;
+      document.getElementById('length').innerText = enhanced.length;
+      // Optionally autofocus selection for quick copy
+      out.focus();
+      out.select();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      document.getElementById('basePrompt').value = '';
+      document.getElementById('enhanced').value = '';
+      document.getElementById('length').innerText = '0';
+      // reset selects and checkboxes
+      document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const val = document.getElementById('enhanced').value;
+      if (!val) return;
+      navigator.clipboard?.writeText(val).then(() => {
+        copyBtn.innerText = 'Copied ✓';
+        setTimeout(() => copyBtn.innerText = 'Copy', 1500);
+      }).catch(() => {
+        // fallback
+        const tmp = document.createElement('textarea');
+        tmp.value = val;
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand('copy');
+        document.body.removeChild(tmp);
+        copyBtn.innerText = 'Copied ✓';
+        setTimeout(() => copyBtn.innerText = 'Copy', 1500);
+      });
+    });
   </script>
 </body>
 </html>
